@@ -1,0 +1,31 @@
+Nonograms
++++++++++
+
+
+.. image:: _common/nonogram.png
+   :height: 424px
+   :width: 381px
+
+Puzzle description
+##################
+
+Nonograms are a category of logic puzzles. A nonogram can be described
+as an encoded picture. The only hints are sequences of numbers printed
+alongside rows and columns.
+
+Each number in a sequence means a sequence of consecutive colored squares.
+For example -  **3, 5, 7** means a sequence of *exactly* 3 colored squares,
+then 5 colored squares, and 7 colored squares.
+
+Solving nonograms is a topic for an entire article, but two simple hints should
+get anyone going:
+
+  * start from big numbers
+  * marking empty squares is just as important as marking colored ones
+
+Additional information
+######################
+
+The puzzle has many other names. It is well described on Wikipedia_.
+
+.. _Wikipedia: http://en.wikipedia.org/wiki/Nonogram

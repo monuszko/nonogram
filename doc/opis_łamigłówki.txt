@@ -1,0 +1,32 @@
+Nonogramy
++++++++++
+
+
+.. image:: _common/nonogram.png
+   :height: 424px
+   :width: 381px
+
+Opis łamigłówki
+###############
+
+Nonogram to rodzaj łamigłówki logicznej. Nonogram można opisać jako zakodowany
+obrazek. Jedynymi wskazówkami są ciągi liczb umieszczone wzdłuż rzędów
+i kolumn.
+
+Każda liczba oznacza nieprzerwany ciąg zaczernionych kratek.
+Na przykład - **3, 5, 7** oznacza ciąg *dokładnie* 3ech zaczernionych kratek,
+potem 5ciu, i wreszcie 7miu.
+
+Metody rozwiązywania tej łamigłówki to temat na cały artykuł, ale na początek
+bardzo dobre są następujące dwie wskazówki:
+
+  * zacznij od dużych liczb
+  * oznaczanie pustych kratek jest równie ważne, co pełnych.
+
+Dodatkowe informacje
+####################
+
+Ta łamigłówka ma wiele innych nazw. Sporo informacji o niej można znaleźć
+na Wikipedii_.
+
+.. _Wikipedii: http://en.wikipedia.org/wiki/Nonogram

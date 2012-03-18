@@ -1,0 +1,37 @@
+Data format
++++++++++++
+
+Example:
+
+::
+  
+  rows:
+  2
+  1, 1
+  1, 4
+  1, 3
+  1, 4
+  8
+  7
+  6
+  4
+  2
+  
+  columns:
+  5
+  3
+  4
+  5
+  6
+  6
+  8
+  1, 4
+  2
+  1
+  
+Notes:
+  * rows/columns without colored squares are represented as a single 0
+  * numbers can be separated by a comma, space, or comma space
+  * not case sensitive; ``columns:`` can be abbreviated to ``cols:``
+  * empty lines are ignored
+  * ``#`` can be used for comments
