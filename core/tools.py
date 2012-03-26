@@ -53,11 +53,7 @@ def rotated_lists(list_of_lists, reverse=False):
     '''
     if reverse:
         list_of_lists.reverse()
-    width = max(len(lst) for lst in list_of_lists)
-    ret = []
-    for i in range(width):
-        ret.append([lst[i] for lst in list_of_lists])
-    return ret
+    return [list(ls) for ls in zip(*list_of_lists)]
 
 def binomial_coefficient(n, k):
     '''
