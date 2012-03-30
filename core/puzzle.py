@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 #    Nonogram solver 
 #    written for Python 3.2
@@ -53,6 +53,9 @@ class Line:
         Debug printing method.
         '''
         s = []
+        for c in self.combs:
+            s.append(c)
+
         for field in 'numbers pos length zones'.split():
             s.append('{0}: {1}'.format(field, getattr(self, field)))
         s = '\n'.join(s)
@@ -63,13 +66,6 @@ class Line:
         Returns row/columns hint numbers as a list of strings
         '''
         return sep.join([str(nr) for nr in self.numbers])
-
-    def printcombs(self):
-        '''
-        Debug method for printing combinations still possible for this row/col
-        '''
-        for c in self.combs:
-            print(c)
 
     def gencombs(self):
         ''' 

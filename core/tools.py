@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 #    Nonogram solver 
 #    written for Python 3.2
