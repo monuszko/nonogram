@@ -63,3 +63,24 @@ def binomial_coefficient(n, k):
     for i in range(1, k + 1):
         result = result * (n - i + 1) // i
     return result 
+
+def gridtodict(lst, ignored='*'):
+    '''
+    ignored - this character will be skipped
+
+    Converts a grid in the form of a list of strings:
+    [row1,
+     row2,
+     row3]
+
+    ... to a dictionary: {(0, 0): char, (0, 1): char, ...}
+
+    '''
+    ret = dict()
+    for y, line in enumerate(lst):
+        for x, char in enumerate(line):
+            if char in ignored:
+                continue
+            ret[(x, y)] = char
+    return ret
+

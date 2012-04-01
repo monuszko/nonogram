@@ -116,8 +116,8 @@ class Line:
         '''
         Return the number of combinations possible with self.numbers
         '''
-        n = self.fspaces    # Size of the set
-        k = len(self.zones) # Size of the sample
+        k = self.fspaces    # k spaces...
+        n = len(self.zones) # ...split between n zones 
         
         if sum(self.numbers) == 0:
             return 1
