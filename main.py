@@ -1,5 +1,4 @@
-#! /usr/bin/env python3
-
+#! /usr/bin/env python3 
 #    Nonogram solver 
 #    written for Python 3.2
 #    Copyright (C) 2012 Marek Onuszko
@@ -21,7 +20,7 @@
 
 from __future__ import division, print_function
 import argparse, sys, re, os.path
-import core.puzzle
+from core.Board import Board
 
 def parseargs():
     '''
@@ -161,7 +160,7 @@ if __name__ == '__main__':
     consistencycheck(rows, cols)
 
     # SOLVING !!!!
-    board = core.puzzle.Board(rows, cols)
+    board = Board(rows, cols)
     if not 'from_scratch' in ardict.keys() and os.path.isfile(dumppath):
         board.load(dumppath)
     if not board.memorysafe():

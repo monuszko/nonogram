@@ -9,18 +9,19 @@ class Testtools(unittest.TestCase):
     """
     
     def test_insert(self):
-        seq1 = range(6)
-        seq2 = range(5)
-        seq3 = range(0)
-        seq4 = range(1)
+        seq1 = list(range(6))
+        seq2 = list(range(5))
+        seq3 = list(range(0))
+        seq4 = list(range(1))
+        seq5 = list(range(16))
 
         item = '*'
 
-        self.assertEqual(inserteveryfifth(range(6), item), [0, 1, 2, 3, 4, '*', 5])
-        self.assertEqual(inserteveryfifth(range(5), item), [0, 1, 2, 3, 4])
-        self.assertEqual(inserteveryfifth(range(0), item), [])
-        self.assertEqual(inserteveryfifth(range(1), item), [0])
-        self.assertEqual(inserteveryfifth(range(16), item), [0, 1, 2, 3, 4, '*', 5, 6, 7, 8, 9, '*', 10, 11, 12, 13, 14, '*', 15])
+        self.assertEqual(inserteveryfifth(seq1, item), [0, 1, 2, 3, 4, '*', 5])
+        self.assertEqual(inserteveryfifth(seq2, item), [0, 1, 2, 3, 4])
+        self.assertEqual(inserteveryfifth(seq3, item), [])
+        self.assertEqual(inserteveryfifth(seq4, item), [0])
+        self.assertEqual(inserteveryfifth(seq5, item), [0, 1, 2, 3, 4, '*', 5, 6, 7, 8, 9, '*', 10, 11, 12, 13, 14, '*', 15])
 
     def test_rotated(self):
         lis1 = []
