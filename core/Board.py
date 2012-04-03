@@ -23,7 +23,6 @@ from itertools import combinations_with_replacement as comb_repl
 import core.tools as tools
 import core.constants as cons
 from   core.Line import Line
-import copy
 
 COMBINATION_LIMIT = 2000000
 
@@ -178,8 +177,6 @@ class Board:
                                                                  x, y, color))
                 self.solved[guess[0]] = guess[1]
 
-        self.verdict()
-
     def verdict(self):
         '''
         Print the status of the board at the end of solving.
@@ -243,9 +240,11 @@ class Board:
         Saves the current state of 'solved', 'rows', and 'cols' in 'backups'.
         Performed before attempting to guess.
         '''
-        solved = dict.copy(self.solved) # 'self.solved' contains only strings
-        rows = copy.deepcopy(self.rows)
-        cols = copy.deepcopy(self.cols)
+        solved = dict.copy(self.solved)
+        #rows = copy.deepcopy(self.rows)  # deepcopy is supposedly WRONG
+        rows = [r.copy() for r in self.rows]
+        #cols = copy.deepcopy(self.cols)  # and EVIL
+        cols = [c.copy() for c in self.cols]
         self.backups.append((solved, rows, cols))
 
     def restore(self):

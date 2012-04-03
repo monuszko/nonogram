@@ -57,11 +57,22 @@ class Testtools(unittest.TestCase):
                                   (1, 1): '/', (2, 1): '\\', (3, 1): '|',
                      (0, 2): '>', (1, 2): ':', (2, 2): '-',  (3, 2): ')'}
         self.assertEqual(gridtodict(lines2), expected2)
+        # TODO: test ignored rather than just '*'
+
+    def test_dicttolists(self):
+
+        old_lines = ['*****',
+                     '*r@2*',
+                     '*fah*',
+                     '*w*v*',
+                     '*****']
+        lines = gridtodict(old_lines)
+        lines = dicttolists(lines, 5) 
+        self.assertEqual(old_lines, lines)
 
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(Testtools))
-
 
 if __name__ == '__main__':
     unittest.main()

@@ -167,5 +167,6 @@ if __name__ == '__main__':
         print('{0}: error: combination limit exceeded'.format(sys.argv[0]))
         sys.exit(1)
     board.solve(**solveargs)
-    if not 'dont_save' in ardict.keys() and not board.issolved():
+    if not 'dont_save' in ardict.keys() and not board.isfull():
         board.dump(dumppath)
+    board.verdict()

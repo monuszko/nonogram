@@ -45,6 +45,21 @@ class Line:
         self.fspaces = self.length - (len(self.numbers) - 1+sum(self.numbers))
         self.combs = [] # List of strings like @@@@...@@....
 
+
+    def copy(self):
+        '''
+        Returns a copy of the the line.
+        '''
+        new = Line(self.pos, self.orient, self.length, self.numbers)
+        new.combs = self.combs[:]
+        return new
+
+    def __eq__(self, other):
+        for attr in 'numbers pos orient length zones fspaces combs'.split():
+            if getattr(self, attr) != getattr(other, attr):
+                return False
+        return True
+
     def __str__(self):
         '''
         Debug printing method.
