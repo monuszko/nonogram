@@ -142,7 +142,20 @@ class TestBoard(unittest.TestCase):
     # TODO: def test_dump(self):
 
     def test_load(self):
-        old_solved = dict.copy(self.Board.solved)
+        self.Board.solved = {}
+        self.Board.load('core/unittests/load.txt')
+        result = dicttolists(self.Board.solved, 10)
+        expected = ['@...@@...@',
+                    '@...@*...*',
+                    '**..@*@@@*',
+                    '**@@@*@..@',
+                    '@...@**..*',
+                    '@@@@@**@@@',
+                    '@...@@...@',
+                    '***@@****@',
+                    '@.@@@@@@@@',
+                    '@.********']
+        self.assertEqual(result, expected)
         
 def suite():
     suite = unittest.TestSuite()
