@@ -20,7 +20,7 @@
 
 from __future__ import division, print_function
 import argparse, sys, re, os.path
-from core.Board import Board
+from core.puzzle import Board
 
 def parseargs():
     '''
