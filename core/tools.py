@@ -19,7 +19,6 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import division, print_function
-import core.constants as cons
 
 def inserteveryfifth(lst, item):
     '''
@@ -94,7 +93,7 @@ def dicttolists(dic, size):
         s = ''
         for x in range(size):
             if (x, y) not in dic:
-                s += cons._UNK
+                s += '*'
             else:
                 s += dic[(x, y)]
         ret.append(s)

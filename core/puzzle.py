@@ -21,7 +21,6 @@
 from __future__ import division, print_function
 from itertools import combinations_with_replacement as comb_repl
 import core.tools as tools
-import core.constants as cons
 
 COMBINATION_LIMIT = 2000000
 _UNK = '*' # Unknown square
@@ -91,7 +90,7 @@ class Line:
         '''
 
         if sum(self.numbers) == 0:
-            self.combs = [cons._EMP * self.length]
+            self.combs = [_EMP * self.length]
             return
 
         # In practice, to generate a list of solutions for each list of numbers
@@ -113,9 +112,9 @@ class Line:
             for zoneindex in distrib:
                 allocated[zoneindex] += 1
 
-            comb = cons._EMP * allocated[0] # First space in combination
+            comb = _EMP * allocated[0] # First space in combination
             for block, space in zip(self.numbers, allocated[1:]):
-                comb += ((block * cons._BLK) + (space * cons._EMP))
+                comb += ((block * _BLK) + (space * _EMP))
             self.combs.append(comb)
 
     def valid(self):
@@ -234,7 +233,7 @@ class Board:
             line = []
             for x in range(self.width):
                 if (x, y) in self.solved:
-                    if self.solved[(x, y)] == cons._EMP:
+                    if self.solved[(x, y)] == _EMP:
                         line.append(legend[1])
                     else:
                         line.append(legend[2]) # Black square
@@ -367,7 +366,7 @@ class Board:
         is the opposite of guess. If there's no contradiction, simply restore.
 
         'xy' - a tuple of coordinates
-        'color' should be cons._BLK or cons._EMP (Black or empty).
+        'color' should be _BLK or _EMP (Black or empty).
 
         Returns True if the board remains valid after the guess.
         Returns False if the guess produces a condradiction.
@@ -392,10 +391,10 @@ class Board:
         for y in range(self.height):
             for x in range(self.width):
                 if (x, y) not in self.solved:
-                    if not self.singleguess((x, y), cons._BLK): #Contradiction
-                        return ((x, y), cons._EMP)
-                    if not self.singleguess((x, y), cons._EMP): #Contradiction
-                        return ((x, y), cons._BLK)
+                    if not self.singleguess((x, y), _BLK): #Contradiction
+                        return ((x, y), _EMP)
+                    if not self.singleguess((x, y), _EMP): #Contradiction
+                        return ((x, y), _BLK)
         return None
 
 
@@ -438,7 +437,7 @@ class Board:
                 if (x, y) in self.solved:
                     f.write(self.solved[(x, y)])
                 else:
-                    f.write(cons._UNK)
+                    f.write(_UNK)
             f.write('\n')
         f.close()
 
@@ -449,9 +448,9 @@ class Board:
         f = open(path, 'r')
         for y, line in enumerate(f):
             for x, char in enumerate(line):
-                if char in (cons._EMP, cons._BLK):
+                if char in (_EMP, _BLK):
                     self.solved[(x, y)] = char
-                elif char == cons._UNK:
+                elif char == _UNK:
                     continue
         f.close()
 
