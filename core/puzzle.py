@@ -38,8 +38,8 @@ class Line:
         self.orient = orient   # 'row' or 'col'
         self.length = length   # Number of squares in the line
         
-        # n-1 zones between @@@ @@, +2 for left and right which MAY have spaces
-        self.zones = tuple([0] + [1] * (len(self.numbers) - 1) + [0])
+        # Each element equals to the MINIMUM possible width:
+        self.gaps = tuple([0] + [1] * (len(self.numbers) - 1) + [0])
 
         # Sequences of marked squares are fixed. There must be at least 1 space
         # between sequences. Number of floating spaces calculated below:
@@ -56,7 +56,7 @@ class Line:
         return new
 
     def __eq__(self, other):
-        for attr in 'numbers pos orient length zones fspaces combs'.split():
+        for attr in 'numbers pos orient length gaps fspaces combs'.split():
             if getattr(self, attr) != getattr(other, attr):
                 return False
         return True
@@ -69,7 +69,7 @@ class Line:
         for c in self.combs:
             s.append(c)
 
-        for field in 'numbers pos length zones'.split():
+        for field in 'numbers pos length gaps'.split():
             s.append('{0}: {1}'.format(field, getattr(self, field)))
         s = '\n'.join(s)
         return s
@@ -94,23 +94,23 @@ class Line:
             return
 
         # In practice, to generate a list of solutions for each list of numbers
-        # I only need to care about the distribution of spaces between zones
+        # I only need to care about the distribution of spaces between gaps
         # (around sequences of marked squares). In math this is called
         # "combinations with repetitions".
         
-        # For each floating space I generate a zone index. A list of such
+        # For each floating space I generate a gap index. A list of such
         # indices will represent a way to distribute spaces around fixed 
         # sequences. So if I want to distribute 18 spaces, that will be a list
         # of 18 indices. Then I will use a list of indices to fill blanks 
         # between sequences.
 
-        spacedistrib = comb_repl(range(len(self.zones)), self.fspaces)
+        spacedistrib = comb_repl(range(len(self.gaps)), self.fspaces)
 
         for distrib in spacedistrib:
 
-            allocated = list(self.zones)
-            for zoneindex in distrib:
-                allocated[zoneindex] += 1
+            allocated = list(self.gaps)
+            for gapindex in distrib:
+                allocated[gapindex] += 1
 
             comb = _EMP * allocated[0] # First space in combination
             for block, space in zip(self.numbers, allocated[1:]):
@@ -130,7 +130,7 @@ class Line:
         Return the number of combinations possible with self.numbers
         '''
         k = self.fspaces    # k spaces...
-        n = len(self.zones) # ...split between n zones 
+        n = len(self.gaps) # ...split between n gaps
         
         if sum(self.numbers) == 0:
             return 1
@@ -140,25 +140,27 @@ class Line:
         ret = tools.binomial_coefficient(n + k - 1, k)
         return ret
 
-    def fits(self, comb, solved):
-        '''
-        Checks if a combination string fits with the dict of solved squares.
 
-        comb   - a combination string
-        solved - the dictionary of solved squares
-        '''
-        if not solved:
-            return True
-        for i in range(self.length):
-            if self.orient == 'row':
-                x, y = i, self.pos
+    def i_to_xy(self, i):
+        if self.orient == 'row':
+            return (i, self.pos)
+        return (self.pos, i)
+
+
+    def updated_combs(self, solved_line):
+
+        solved_indices = [i for i, ch in enumerate(solved_line) if ch != _UNK]
+
+        newcombs = []
+        for comb in self.combs:
+            for ind in solved_indices:
+                if comb[ind] != solved_line[ind]:
+                    break
             else:
-                x, y = self.pos, i
+                newcombs.append(comb)
 
-            if (x, y) in solved:
-                if comb[i] != solved[(x, y)]:
-                    return False
-        return True
+        return newcombs
+
 
     def findfixed(self, solved):
         '''
@@ -169,24 +171,31 @@ class Line:
 
         solved - the dictionary of solved squares
         '''
+        solved_line = []
+        for i in range(self.length):
+            coords = self.i_to_xy(i)
+            solved_line.append(solved.get(coords, _UNK))
 
         # First, remove combinations invalidated by already known squares:
-        self.combs = [c for c in self.combs if self.fits(c, solved)]
+        self.combs = self.updated_combs(solved_line)
 
         # Second, check if a square has the same 'color' in all combinations:
         changed = []
-        for i in range(self.length):
-            if self.orient == 'row':
-                x, y = i, self.pos
-            else:
-                x, y = self.pos, i
+        if not self.combs:
+            return changed
 
-            if (x, y) not in solved:
-                char = set([comb[i] for comb in self.combs]) #i-th squares
-                if len(char) == 1:
-                    char = char.pop()
-                    solved[(x, y)] = char 
-                    changed.append((x, y))
+        for i in range(self.length):
+            if solved_line[i] != _UNK:
+                continue
+
+            for comb in self.combs:
+                if comb[i] != self.combs[0][i]:
+                    break
+            else:
+                coords = self.i_to_xy(i)
+                solved[(coords)] = comb[i]
+                changed.append((coords))
+
         return changed
 
 class Board:
