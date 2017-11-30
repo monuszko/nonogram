@@ -25,3 +25,9 @@ Contact
 =======
 
 marek.onuszko@gmail.com
+
+Credits
+=======
+
+Александр Берсенев (bay@hackerdom.ru) for making the core routine 6-10 times
+faster.

@@ -140,17 +140,17 @@ class Line:
         ret = tools.binomial_coefficient(n + k - 1, k)
         return ret
 
-
     def i_to_xy(self, i):
         if self.orient == 'row':
             return (i, self.pos)
         return (self.pos, i)
 
-
     def updated_combs(self, solved_line):
-
+        '''
+        Returns combinations without those which don't fit
+        with the (recently) discovered solved squares.
+        '''
         solved_indices = [i for i, ch in enumerate(solved_line) if ch != _UNK]
-
         newcombs = []
         for comb in self.combs:
             for ind in solved_indices:
@@ -161,20 +161,19 @@ class Line:
 
         return newcombs
 
+    def coords(self):
+        '''
+        Return a list of coordinate tuples making up this line.
+        '''
+        return [self.i_to_xy(i) for i in range(self.length)]
 
-    def findfixed(self, solved):
+    def findfixed(self, solved_line):
         '''
         1. Loads the dictionary of solved squares
         2. Discards combinations not valid with already solved squares
         3. Checks for new squares that are always the same in all combinations
         and puts them back in dictionary of solved squares.
-
-        solved - the dictionary of solved squares
         '''
-        solved_line = []
-        for i in range(self.length):
-            coords = self.i_to_xy(i)
-            solved_line.append(solved.get(coords, _UNK))
 
         # First, remove combinations invalidated by already known squares:
         self.combs = self.updated_combs(solved_line)
@@ -193,8 +192,7 @@ class Line:
                     break
             else:
                 coords = self.i_to_xy(i)
-                solved[(coords)] = comb[i]
-                changed.append((coords))
+                changed.append((coords, comb[i]))
 
         return changed
 
@@ -297,16 +295,22 @@ class Board:
         tocheck = self.rows + self.cols # A list
         while len(tocheck) > 0:
             line = tocheck.pop()
-            changed = line.findfixed(self.solved)
-            for square in changed:
-                x, y = square[0], square[1]
-                if line.orient == 'row':
-                    if self.cols[x] not in tocheck:
-                        tocheck.insert(0, self.cols[x])
-                if line.orient == 'col':
-                    if self.rows[y] not in tocheck:
-                        tocheck.insert(0, self.rows[y])
+            solved_line = [self.solved.get(xy, _UNK) for xy in line.coords()]
+            changed = line.findfixed(solved_line)
+            for coords, color in changed:
+                self.solved[coords] = color
+                crossing = self.get_crossing(line, coords)
+                if crossing not in tocheck:
+                    tocheck.insert(0, crossing)
         return len(self.solved) > initially_solved
+
+    def get_crossing(self, line, coords):
+        '''
+        Returns the Line crossing given Line at coords.
+        '''
+        if line.orient == 'row':
+            return self.cols[coords[0]]
+        return self.rows[coords[1]]
 
     def memorysafe(self):
         '''

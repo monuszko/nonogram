@@ -28,7 +28,7 @@ class TestLine(unittest.TestCase):
 
         # Pointless ?
         l1 = Line(pos=4, orient='row', length=25, numbers=[3, 4, 5])
-        self.assertEqual(l1.zones, (0, 1, 1, 0))
+        self.assertEqual(l1.gaps, (0, 1, 1, 0))
         self.assertEqual(l1.fspaces, 11)
 
     def test_gencombs(self):
@@ -94,7 +94,7 @@ class TestLine(unittest.TestCase):
         l4 = Line(pos=9, orient='col', length=20, numbers=[1, 2, 3, 4])
         self.assertEqual(l4.combcount(), 330) # Calculated by hand
 
-    def test_fits(self):
+    def test_updated_combs(self):
 
 
         solved = ['......@@@.',
@@ -111,59 +111,12 @@ class TestLine(unittest.TestCase):
     
         # Actually only pos and orient matter
         c1 = Line(pos=9, orient='col', length=10, numbers=[0])
-        self.assertEqual(c1.fits('...@@@@@@@', solved), True)
-        self.assertEqual(c1.fits('...@@..@@@', solved), False)
-
-        c2 = Line(pos=4, orient='col', length=10, numbers=[0])
-        self.assertEqual(c2.fits('..........', solved), True)
-        self.assertEqual(c2.fits('..@...@...', solved), False)
-
-        r1 = Line(pos=4, orient='row', length=10, numbers=[0])
-        self.assertEqual(r1.fits('.....@...@', solved), True)
-        self.assertEqual(r1.fits('@.@.@.@.@.', solved), False)
-
-        r2 = Line(pos=0, orient='row', length=10, numbers=[0])
-        self.assertEqual(r2.fits('......@@@.', solved), True)
-        self.assertEqual(r2.fits('.@....@@@.', solved), False)
-
-        solved2 = ['.*.*****@.',
-                   '@.@@******',
-                   '***...@.**',
-                   '@.*****@@@',
-                   '***.****.@',
-                   '**...@****',
-                   '.******@**',
-                   '.....@@@**',
-                   '.....@...@',
-                   '.....@@@@@' ]
-        solved2 = gridtodict(solved2)
-
-        c1 = Line(pos=2, orient='col', length=10, numbers=[0])
-        self.assertEqual(c1.fits('.@@@@.@...', solved2), True)
-        self.assertEqual(c1.fits('.@.@......', solved2), True)
-        self.assertEqual(c1.fits('...@......', solved2), False)
-        self.assertEqual(c1.fits('.........@', solved2), False)
-        self.assertEqual(c1.fits('..........', solved2), False)
-        self.assertEqual(c1.fits('@@@@@@@@@@', solved2), False)
-
-        c2 = Line(pos=9, orient='col', length=10, numbers=[0])
-        self.assertEqual(c2.fits('...@@...@@', solved2), True)
-        self.assertEqual(c2.fits('.@@@@..@@@', solved2), True)
-        self.assertEqual(c2.fits('@..@@...@@', solved2), False)
-
-        r1 = Line(pos=0, orient='row', length=10, numbers=[0])
-        self.assertEqual(r1.fits('.@.@...@@.', solved2), True)
-        self.assertEqual(r1.fits('........@.', solved2), True)
-        #self.assertEqual(r1.fits('........@..', solved2), True) TODO: fix !
-        self.assertEqual(r1.fits('..........', solved2), False)
-        self.assertEqual(r1.fits('.@.@...@..', solved2), False)
-        self.assertEqual(r1.fits('@@@@@@@@@@', solved2), False)
-
-        r2 = Line(pos=1, orient='row', length=10, numbers=[0])
-        self.assertEqual(r2.fits('@.@@......', solved2), True)
-        self.assertEqual(r2.fits('@.@@@@@@@@', solved2), True)
-        self.assertEqual(r2.fits('@..@......', solved2), False)
-        self.assertEqual(r2.fits('@@@@......', solved2), False)
+        combs1 = ['...@@@@@@@',
+                  '...@@..@@@',]
+        c1.combs = combs1[:]
+        solved_line = [solved.get(xy, _UNK) for xy in c1.coords()]
+        filtered = c1.updated_combs(solved_line)
+        self.assertItemsEqual(filtered, combs1[:1])
 
     def test_findfixed(self):
         initialcombs = ['@@..@@@.@@',
@@ -172,53 +125,27 @@ class TestLine(unittest.TestCase):
                         '@@....@@@@',
                         '@@@.@..@@@']
         
-        # Test the 'find new squares' functionality:
-        solved = dict()
         c1 = Line(pos=2, orient='col', length=10, numbers=[0])
         c1.combs = initialcombs
-        self.assertEqual(c1.findfixed(solved), [(2, 0), (2, 3), (2, 8)])
-        self.assertEqual((solved), {(2, 0): '@', (2, 3): '.', (2, 8): '@'})
+        solved_line = [_UNK for coords in c1.coords()]
+        changed = c1.findfixed(solved_line)
+        self.assertEqual(changed, [
+                                   ((2, 0), _BLK),
+                                   ((2, 3), _EMP),
+                                   ((2, 8), _BLK),
+                                  ]
+                        )
 
-        solved2 = dict()
         r1 = Line(pos=2, orient='row', length=10, numbers=[0])
-        r1.combs = initialcombs 
-        self.assertEqual(r1.findfixed(solved2), [(0, 2), (3, 2), (8, 2)])
-        self.assertEqual((solved2), {(0, 2): '@', (3, 2): '.', (8, 2): '@'})
-
-        # Test the 'discard unfitting combinations' functionality:
-        solved3 = {(5, 1): '@'}
-        c2 = Line(pos=5, orient='col', length=10, numbers=[8])
-        c2.combs = initialcombs
-        self.assertEqual(c2.findfixed(solved3), [(5, 0), (5, 3), (5, 8)])
-
-        self.assertEqual(c2.combs, ['@@..@@@.@@',
-                                    '@@@..@@.@.',
-                                   #'@...@@@@@@', automatically removed
-                                    '@@....@@@@',
-                                    '@@@.@..@@@'])
-        
-        solved4 = {(4, 6): '.'}
-        r2 = Line(pos=6, orient='row', length=10, numbers=[8])
-        r2.combs = initialcombs
-        self.assertEqual(r2.findfixed(solved4), [(0, 6), (1, 6), (3, 6), (6, 6), (8, 6)])
-        self.assertEqual(r2.combs,  [#'@@..@@@.@@', automatically removed
-                                      '@@@..@@.@.',
-                                     #'@...@@@@@@', automatically removed
-                                      '@@....@@@@',
-                                     #'@@@.@..@@@'  automatically removed
-                                     ])
-
-        # Two squares at the same time
-        solved5 = {(1, 7): '@', (7, 7): '@'}
-        r3 = Line(pos=7, orient='row', length=10, numbers=[2,3])
-        r3.combs = initialcombs
-        self.assertEqual(r3.findfixed(solved5), [(0, 7), (3, 7), (5, 7), (8, 7), (9, 7)])
-        self.assertEqual(r3.combs, [#'@@..@@@.@@',
-                                    #'@@@..@@.@.',
-                                    #'@...@@@@@@',
-                                    '@@....@@@@',
-                                    '@@@.@..@@@'])
-        
+        r1.combs = initialcombs
+        solved_line = [_UNK for coords in r1.coords()]
+        changed = r1.findfixed(solved_line)
+        self.assertEqual(changed, [
+                                   ((0, 2), _BLK),
+                                   ((3, 2), _EMP),
+                                   ((8, 2), _BLK),
+                                  ]
+                        )
 
 
 class TestBoard(unittest.TestCase):
