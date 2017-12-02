@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 #
-#    Nonogram solver 
+#    Nonogram solver
 #    written for Python 3.2
 #    Copyright (C) 2012 Marek Onuszko
 #    marek.onuszko@gmail.com
@@ -20,11 +20,12 @@
 
 from __future__ import division, print_function
 
+
 def inserteveryfifth(lst, item):
     '''
     Inserts the second argument after every fifth element of the list.
 
-    lst  - the list to be modified 
+    lst  - the list to be modified
     item - item to insert
     '''
 
@@ -33,6 +34,7 @@ def inserteveryfifth(lst, item):
     for i in reversed(insertion_points):
         newlst.insert(i, item)
     return newlst
+
 
 def rotated_lists(list_of_lists, reverse=False):
     '''
@@ -55,6 +57,7 @@ def rotated_lists(list_of_lists, reverse=False):
         list_of_lists.reverse()
     return [list(ls) for ls in zip(*list_of_lists)]
 
+
 def binomial_coefficient(n, k):
     '''
     Calculate a binomial coefficient.
@@ -62,7 +65,8 @@ def binomial_coefficient(n, k):
     result = 1
     for i in range(1, k + 1):
         result = result * (n - i + 1) // i
-    return result 
+    return result
+
 
 def gridtodict(lst, ignored='*'):
     '''
@@ -84,6 +88,7 @@ def gridtodict(lst, ignored='*'):
             ret[(x, y)] = char
     return ret
 
+
 def dicttolists(dic, size):
     '''
     gridtodict() in reverse
@@ -98,6 +103,3 @@ def dicttolists(dic, size):
                 s += dic[(x, y)]
         ret.append(s)
     return ret
-
-
-

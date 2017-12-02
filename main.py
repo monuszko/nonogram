@@ -1,5 +1,5 @@
-#! /usr/bin/env python3 
-#    Nonogram solver 
+#! /usr/bin/env python3
+#    Nonogram solver
 #    written for Python 3.2
 #    Copyright (C) 2012 Marek Onuszko
 #    marek.onuszko@gmail.com
@@ -19,61 +19,69 @@
 
 
 from __future__ import division, print_function
-import argparse, sys, re, os.path
+
+import argparse
+import sys
+import re
+import os.path
+
 from core.puzzle import Board
+
 
 def parseargs():
     '''
     Parses commandline arguments.
     '''
     desc = {
-            'filename': 'a file containing a nonogram',
-            '-p': 'disables progress displays and messages',
-            '-g': 'enables grouping rows and columns by five for progress',
-            '-n': 'disables both row and column hint numbers',
-            '-l': 'characters used for unkown, empty, and black squares, '
-                                                              '(default: *.@)',
-            '-s': 'characters used for vertical, horizontal, and cross-section'
-                                                  ' separators (default: |-+)',
-            '-d': 'disables caching of progress (for multiple solutions)',
-            '-f': 'prevents use of existing cache files'
-           }
+        'filename': 'a file containing a nonogram',
+        '-p': 'disables progress displays and messages',
+        '-g': 'enables grouping rows and columns by five for progress',
+        '-n': 'disables both row and column hint numbers',
+        '-l': 'characters used for unkown, empty, and black squares, '
+              '(default: *.@)',
+        '-s': 'characters used for vertical, horizontal, and cross-section'
+              ' separators (default: |-+)',
+        '-d': 'disables caching of progress (for multiple solutions)',
+        '-f': 'prevents use of existing cache files'
+        }
 
+    ep = '''If there are multiple solutions, the program saves 100% sure
+        squares in a cache/*.sav file. You can edit it manually and set an
+        unknown square (*) to empty (.) or (black). On the next run the program
+        will use your assumption.'''
     parser = argparse.ArgumentParser(description='Solve a nonogram.',
-             epilog='''If there are multiple solutions, the program saves 
-                    100% sure squares in a cache/*.sav file. You can edit it
-                    manually and set an unknown square (*) to empty (.)
-                    or (black). On the next run the program will use
-                    your assumption.'''
-                    )
+                                     epilog=ep
+                                     )
 
-    # I force defaults to None  
+    # I force defaults to None
     # I want to actually use the defaults from .solve().
     parser.add_argument('filename', type=str, help=desc['filename'])
-    parser.add_argument('-p', '--hide-progress', action='store_true', 
-                                                 default=None, help=desc['-p'])
-    parser.add_argument('-g', '--no-grouping', action='store_true', 
-                                                 default=None, help=desc['-g'])
-    parser.add_argument('-n', '--no-hints', action='store_true', 
-                                                 default=None, help=desc['-n'])
-    parser.add_argument('-l', '--legend', metavar='ueb', help=desc['-l'])      
+    parser.add_argument('-p', '--hide-progress', action='store_true',
+                        default=None, help=desc['-p'])
+    parser.add_argument('-g', '--no-grouping', action='store_true',
+                        default=None, help=desc['-g'])
+    parser.add_argument('-n', '--no-hints', action='store_true',
+                        default=None, help=desc['-n'])
+    parser.add_argument('-l', '--legend', metavar='ueb', help=desc['-l'])
     parser.add_argument('-s', '--separators', metavar='vhc', help=desc['-s'])
-    parser.add_argument('-d', '--dont-save', action='store_true', 
-                                                 default=None, help=desc['-d'])
-    parser.add_argument('-f', '--from-scratch', action='store_true', 
-                                                 default=None, help=desc['-f'])
+    parser.add_argument('-d', '--dont-save', action='store_true',
+                        default=None, help=desc['-d'])
+    parser.add_argument('-f', '--from-scratch', action='store_true',
+                        default=None, help=desc['-f'])
+
     ardict = vars(parser.parse_args())
-    ardict = {k : v for k, v in ardict.items() if v is not None}
+    ardict = {k: v for k, v in ardict.items() if v is not None}
     solveargs = ardict.copy()
-    solveargs = {k : v for k, v in solveargs.items() 
-             if k not in ('filename', 'from_scratch', 'dont_save')}
+    solveargs = {k: v for k, v in solveargs.items()
+                 if k not in ('filename', 'from_scratch', 'dont_save')}
 
     for arg in ('legend', 'separators'):
         if arg in ardict and len(ardict[arg]) != 3:
-            print('{0}: error: "{1}" must be 3 characters long.'.format(
-                                                             sys.argv[0], arg))
+            errstr = '{0}: error: "{1}" must be 3 characters long.'
+            print(errstr.format(sys.argv[0], arg))
             sys.exit(1)
     return (ardict, solveargs)
+
 
 def formatcheck(lines):
     '''
@@ -89,9 +97,10 @@ def formatcheck(lines):
         if line.isspace() or line == '':
             continue
         if not re.match(misc, line) and not re.match(numbers, line):
-            print('{0}: error: bad input line format: {1}'.format(
-                                                       sys.argv[0], unchanged))
+            errstr = '{0}: error: bad input line format: {1}'
+            print(errstr.format(sys.argv[0], unchanged))
             sys.exit(1)
+
 
 def parselines(lines):
     '''
@@ -100,10 +109,11 @@ def parselines(lines):
     rows = []
     cols = []
     for line in lines:
-        line = line.partition('#')[0] # Handles comments
-        if line.lower().startswith('rows:'): 
+        # comments:
+        line = line.partition('#')[0]
+        if line.lower().startswith('rows:'):
             mode = 'rows'
-        elif line.lower().startswith(('cols:', 'columns:')): 
+        elif line.lower().startswith(('cols:', 'columns:')):
             mode = 'cols'
         elif line.isspace() or line == '':
             continue
@@ -115,6 +125,7 @@ def parselines(lines):
             elif mode == 'cols':
                 cols.append(hint)
     return (rows, cols)
+
 
 def consistencycheck(rows, cols):
     '''
@@ -134,11 +145,12 @@ def consistencycheck(rows, cols):
         if sum(line) + len(line) - 1 > len(rows):
             print('{0}: error: column {1} too long.'.format(sys.argv[0], line))
             sys.exit(1)
-    sumofcols = sum(sum(col) for col in cols) 
-    sumofrows = sum(sum(row) for row in rows) 
-    if sumofcols != sumofrows: # Would probably cover all of the above
-        print("{0}: error: sum of cols doesn't equal sum of rows".format(
-                                                                  sys.argv[0]))
+    sumofcols = sum(sum(col) for col in cols)
+    sumofrows = sum(sum(row) for row in rows)
+    # Would probably cover all of the above:
+    if sumofcols != sumofrows:
+        errstr = "{0}: error: sum of cols doesn't equal sum of rows"
+        print(errstr.format(sys.argv[0]))
         sys.exit(1)
 
 if __name__ == '__main__':
@@ -161,12 +173,12 @@ if __name__ == '__main__':
 
     # SOLVING !!!!
     board = Board(rows, cols)
-    if not 'from_scratch' in ardict.keys() and os.path.isfile(dumppath):
+    if 'from_scratch' not in ardict.keys() and os.path.isfile(dumppath):
         board.load(dumppath)
     if not board.memorysafe():
         print('{0}: error: combination limit exceeded'.format(sys.argv[0]))
         sys.exit(1)
     board.solve(**solveargs)
-    if not 'dont_save' in ardict.keys() and not board.isfull():
+    if 'dont_save' not in ardict.keys() and not board.isfull():
         board.dump(dumppath)
     board.verdict()

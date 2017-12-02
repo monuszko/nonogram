@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 #
-#    Nonogram solver 
+#    Nonogram solver
 #    written for Python 3.2
 #    Copyright (C) 2012 Marek Onuszko
 #    marek.onuszko@gmail.com
@@ -23,9 +23,12 @@ from itertools import combinations_with_replacement as comb_repl
 import core.tools as tools
 
 COMBINATION_LIMIT = 2000000
-_UNK = '*' # Unknown square
-_EMP = '.' # Empty square
-_BLK = '@' # Black square
+
+# Unknown, empty and full(black) squares:
+_UNK = '*'
+_EMP = '.'
+_BLK = '@'
+
 
 class Line:
     '''
@@ -33,19 +36,22 @@ class Line:
     '''
     def __init__(self, pos, orient, length, numbers):
         # Input data:
-        self.numbers = numbers # a sequence of numbers or a single 0 
-        self.pos = pos         # position relative to other rows/cols
-        self.orient = orient   # 'row' or 'col'
-        self.length = length   # Number of squares in the line
-        
+        # a sequence of numbers or a single 0:
+        self.numbers = numbers
+        # position relative to other rows/cols:
+        self.pos = pos
+        # 'row' or 'col':
+        self.orient = orient
+        self.length = length
+
         # Each element equals to the MINIMUM possible width:
         self.gaps = tuple([0] + [1] * (len(self.numbers) - 1) + [0])
 
         # Sequences of marked squares are fixed. There must be at least 1 space
         # between sequences. Number of floating spaces calculated below:
         self.fspaces = self.length - (len(self.numbers) - 1+sum(self.numbers))
-        self.combs = [] # List of strings like @@@@...@@....
-
+        # List of strings like @@@@...@@.... :
+        self.combs = []
 
     def copy(self):
         '''
@@ -81,7 +87,7 @@ class Line:
         return sep.join([str(nr) for nr in self.numbers])
 
     def gencombs(self):
-        ''' 
+        '''
         Transforms the input numbers into a list of possible combinations
             made of sequences of marked squares and spaces and places them in
             self.combs. Example below:
@@ -97,11 +103,11 @@ class Line:
         # I only need to care about the distribution of spaces between gaps
         # (around sequences of marked squares). In math this is called
         # "combinations with repetitions".
-        
+
         # For each floating space I generate a gap index. A list of such
-        # indices will represent a way to distribute spaces around fixed 
+        # indices will represent a way to distribute spaces around fixed
         # sequences. So if I want to distribute 18 spaces, that will be a list
-        # of 18 indices. Then I will use a list of indices to fill blanks 
+        # of 18 indices. Then I will use a list of indices to fill blanks
         # between sequences.
 
         spacedistrib = comb_repl(range(len(self.gaps)), self.fspaces)
@@ -112,7 +118,8 @@ class Line:
             for gapindex in distrib:
                 allocated[gapindex] += 1
 
-            comb = _EMP * allocated[0] # First space in combination
+            # First space in combination
+            comb = _EMP * allocated[0]
             for block, space in zip(self.numbers, allocated[1:]):
                 comb += ((block * _BLK) + (space * _EMP))
             self.combs.append(comb)
@@ -129,9 +136,9 @@ class Line:
         '''
         Return the number of combinations possible with self.numbers
         '''
-        k = self.fspaces    # k spaces...
-        n = len(self.gaps) # ...split between n gaps
-        
+        k = self.fspaces
+        n = len(self.gaps)
+
         if sum(self.numbers) == 0:
             return 1
         if sum(self.numbers) + (len(self.numbers) - 1) == self.length:
@@ -196,6 +203,7 @@ class Line:
 
         return changed
 
+
 class Board:
     '''
     Represents a board consisting of rows and columns. Provides high-level
@@ -207,12 +215,13 @@ class Board:
         self.cols = []
         self.solved = dict()
         self.height = len(rows)
-        self.width  = len(cols)
+        self.width = len(cols)
         for nr, row in enumerate(rows):
             self.rows.append(Line(nr, 'row', self.width, row))
         for nr, col in enumerate(cols):
             self.cols.append(Line(nr, 'col', self.height, col))
-        self.backups = [] # For guessing (contradictions)
+        # For guessing and solving via contradictions:
+        self.backups = []
 
     def isfull(self):
         '''
@@ -220,13 +229,12 @@ class Board:
         '''
         return len(self.solved) == self.height * self.width
 
-
-    def display(self, no_grouping=False, no_hints=False, 
-                                               legend='*.@', separators='|-+'):
+    def display(self, no_grouping=False, no_hints=False,
+                legend='*.@', separators='|-+'):
         '''
         A hopelessly complex line-based display method
 
-        no_grouping - don't display as 5x5 squares 
+        no_grouping - don't display as 5x5 squares
         no_hints    - don't print line hints
         legend      - a length 3 string, (unkown, empty, black)
         separators  - a length 3 string (horizontal, vertical, crossing)
@@ -243,18 +251,20 @@ class Board:
                     if self.solved[(x, y)] == _EMP:
                         line.append(legend[1])
                     else:
-                        line.append(legend[2]) # Black square
+                        # Black square
+                        line.append(legend[2])
                 else:
-                    line.append(legend[0]) # Unknown square
+                    # Unknown square
+                    line.append(legend[0])
             lines.append(line)
 
         if not no_grouping:
             # .....|@@@@@|..@.@|...@@|.....
             lines = [tools.inserteveryfifth(line, VSEP) for line in lines]
 
-            horsep =  [HSEP] * self.width
+            horsep = [HSEP] * self.width
             horsep = tools.inserteveryfifth(horsep, CSEP)
-            lines  = tools.inserteveryfifth(lines, horsep)
+            lines = tools.inserteveryfifth(lines, horsep)
         lines = [''.join(line) for line in lines]
 
         if not no_hints:
@@ -264,8 +274,8 @@ class Board:
             longest = max(len(h) for h in row_hints)
             row_hints = [hint.rjust(longest) + ' ' for hint in row_hints]
             if not no_grouping:
-                row_hints = tools.inserteveryfifth(row_hints, 
-                                                            ' ' * (longest +1))
+                row_hints = tools.inserteveryfifth(row_hints,
+                                                   ' ' * (longest + 1))
             lines = [h + l for h, l in zip(row_hints, lines)]
 
             # COLUMN hints:
@@ -274,14 +284,14 @@ class Board:
             longest_hint = max(len(c) for c in col_extras)
             col_extras = [c.rjust(longest_hint) for c in col_extras]
             if not no_grouping:
-                col_extras = tools.inserteveryfifth(col_extras, 
-                                                          [' '] * longest_hint)
+                col_extras = tools.inserteveryfifth(col_extras,
+                                                    [' '] * longest_hint)
             col_extras = tools.rotated_lists(col_extras)
             col_extras = [''.join(c).rjust(linewidth) for c in col_extras]
             col_extras.append(' ' * linewidth)
             lines = col_extras + lines
 
-        for line in lines: 
+        for line in lines:
             print(line)
 
     def basicsolve(self):
@@ -292,7 +302,7 @@ class Board:
         to the queue of lines to check. Repeat for as long as progress is made.
         '''
         initially_solved = len(self.solved)
-        tocheck = self.rows + self.cols # A list
+        tocheck = self.rows + self.cols
         while len(tocheck) > 0:
             line = tocheck.pop()
             solved_line = [self.solved.get(xy, _UNK) for xy in line.coords()]
@@ -322,8 +332,8 @@ class Board:
             return False
         return True
 
-    def solve(self, no_hints=False, legend='*.@', 
-            separators='|-+', no_grouping=False, hide_progress=False):
+    def solve(self, no_hints=False, legend='*.@',
+              separators='|-+', no_grouping=False, hide_progress=False):
         '''
         The master solve method calling lesser methods.
         '''
@@ -331,7 +341,7 @@ class Board:
         for line in self.rows + self.cols:
             line.gencombs()
 
-        progress = True # don't assume everything is solvable with this program
+        progress = True
         while progress:
             if not hide_progress:
                 print('Straightforward attempt...')
@@ -340,7 +350,7 @@ class Board:
                 break
             if progress and not hide_progress:
                 self.display(no_grouping, no_hints, legend, separators)
-            if self.isfull(): # To avoid the single unneeded guess
+            if self.isfull():
                 break
             if not hide_progress:
                 print('Attempting contradiction...')
@@ -349,24 +359,24 @@ class Board:
                 progress = True
                 x, y, color = guess[0][0] + 1, guess[0][1] + 1, guess[1]
                 if not hide_progress:
-                    print('From contradiction: ({0}, {1}) is "{2}"'.format(
-                                                                 x, y, color))
+                    msg = 'From contradiction: ({0}, {1}) is "{2}"'
+                    print(msg.format(x, y, color))
                 self.solved[guess[0]] = guess[1]
 
     def verdict(self):
         '''
         Print the status of the board at the end of solving.
         '''
-        
+
         if self.valid():
             self.display(no_grouping=True, legend='* #', no_hints=True)
             if self.isfull():
-                print("{0} out of {1} squares solved.".format(
-                           len(self.solved), self.width * self.height))
+                msg = "{0} out of {1} squares solved."
+                print(msg.format(len(self.solved), self.width * self.height))
             else:
                 unsolved = self.width * self.height - len(self.solved)
-                print("{0} out of {1} squares left.".format(unsolved,
-                                                   self.width * self.height))
+                msg = "{0} out of {1} squares left."
+                print(msg.format(unsolved, self.width * self.height))
         else:
             self.display(no_grouping=True, legend='* #', no_hints=True)
             print('The puzzle has no solutions !')
@@ -399,17 +409,18 @@ class Board:
 
         Returns:
         ((x, y), color) if found a contradiction
-        None - if not found 
+        None - if not found
         '''
         for y in range(self.height):
             for x in range(self.width):
                 if (x, y) not in self.solved:
-                    if not self.singleguess((x, y), _BLK): #Contradiction
+                    if not self.singleguess((x, y), _BLK):
+                        # contradiction
                         return ((x, y), _EMP)
-                    if not self.singleguess((x, y), _EMP): #Contradiction
+                    if not self.singleguess((x, y), _EMP):
+                        # contradiction
                         return ((x, y), _BLK)
         return None
-
 
     def save(self):
         '''
@@ -417,9 +428,7 @@ class Board:
         Performed before attempting to guess.
         '''
         solved = dict.copy(self.solved)
-        #rows = copy.deepcopy(self.rows)  # deepcopy is supposedly WRONG
         rows = [r.copy() for r in self.rows]
-        #cols = copy.deepcopy(self.cols)  # and EVIL
         cols = [c.copy() for c in self.cols]
         self.backups.append((solved, rows, cols))
 
@@ -435,13 +444,13 @@ class Board:
         A board is valid if all of its rows and columns are valid.
         Used for guessing.
         '''
-        if all(l.valid() for l in self.rows + self.cols): # Assumes lists !
+        if all(l.valid() for l in self.rows + self.cols):
             return True
         return False
 
     def dump(self, path):
         '''
-        Dumps the solved squares to a file. 
+        Dumps the solved squares to a file.
         '''
         f = open(path, 'w')
 
@@ -466,4 +475,3 @@ class Board:
                 elif char == _UNK:
                     continue
         f.close()
-
